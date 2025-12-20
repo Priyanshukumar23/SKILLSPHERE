@@ -1,0 +1,212 @@
+/* Reset */
+.chat-page-container {
+    background: var(--bg-primary);
+    min-height: 100vh;
+    color: var(--text-primary);
+    padding-top: 80px;
+    /* Space for fixed navbar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.chat-logo-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.chat-logo {
+    width: 45px;
+    height: 45px;
+}
+
+.chat-brand {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-primary);
+}
+
+/* Chat Container */
+.chat-container {
+    width: 100%;
+    max-width: 900px;
+    height: 65vh;
+    padding: 24px;
+    background: #FFFFFF;
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--glass-border);
+}
+
+/* Scrollbar */
+.chat-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-container::-webkit-scrollbar-thumb {
+    background: #E0E0E0;
+    border-radius: 10px;
+}
+
+/* Message Wrapper */
+.chat-message-wrapper {
+    display: flex;
+    align-items: flex-end;
+    margin: 8px 0;
+    width: 100%;
+}
+
+.chat-message-wrapper.chat-right {
+    justify-content: flex-start;
+}
+
+.chat-message-wrapper.chat-left {
+    justify-content: flex-end;
+}
+
+.chat-message-wrapper.system {
+    justify-content: center;
+}
+
+/* Messages */
+.chat-message {
+    max-width: 65%;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    animation: fadeIn 0.25s ease-in-out;
+    word-wrap: break-word;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Incoming */
+.chat-message.chat-right {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-top-left-radius: 4px;
+    border: 1px solid #EDEDED;
+}
+
+/* Outgoing */
+.chat-message.chat-left {
+    background: var(--accent);
+    color: #FFFFFF;
+    border-top-right-radius: 4px;
+}
+
+/* Avatars */
+.chat-avatar {
+    width: 35px;
+    height: 35px;
+    margin-bottom: 4px;
+}
+
+/* Send Section */
+.chat-send-section {
+    padding: 24px 0;
+    width: 100%;
+    max-width: 900px;
+}
+
+/* Input Area */
+.chat-send-form {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Input */
+.chat-input {
+    flex: 1;
+    padding: 14px 20px;
+    border-radius: 30px;
+    border: 1px solid #E5E5E5;
+    outline: none;
+    font-size: 1rem;
+    background: #FFFFFF;
+    color: var(--text-primary);
+    box-shadow: var(--shadow-soft);
+    transition: all 0.2s;
+}
+
+.chat-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(192, 160, 128, 0.15);
+}
+
+/* Button */
+.chat-btn {
+    padding: 14px 30px;
+    border-radius: 30px;
+    border: none;
+    background: var(--text-primary);
+    color: #FFFFFF;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(44, 44, 44, 0.1);
+}
+
+.chat-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(44, 44, 44, 0.2);
+}
+
+.chat-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.chat-join-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.chat-join-box {
+    background: #FFFFFF;
+    padding: 40px;
+    border-radius: 24px;
+    text-align: center;
+    min-width: 320px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid #F0F0F0;
+}
+
+.chat-join-box h2 {
+    margin-bottom: 24px;
+    color: var(--text-primary);
+    font-weight: 700;
+}
