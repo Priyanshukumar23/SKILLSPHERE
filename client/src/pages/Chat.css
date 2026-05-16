@@ -210,3 +210,61 @@
     color: var(--text-primary);
     font-weight: 700;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chat-page-container {
+        padding-top: 70px;
+        /* Less top padding */
+    }
+
+    .chat-container {
+        height: 75vh;
+        /* Taller chat area on mobile */
+        padding: 15px;
+        border-radius: 12px;
+    }
+
+    .chat-message {
+        max-width: 85%;
+        /* Wider messages on mobile */
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .chat-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .chat-send-section {
+        padding: 15px 15px;
+        /* Add horizontal padding */
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        background: var(--bg-primary);
+        /* Ensure background handles transparency issues */
+        z-index: 100;
+    }
+
+    .chat-container {
+        margin-bottom: 80px;
+        /* Space for fixed input */
+        height: calc(100vh - 160px);
+    }
+
+    .chat-input {
+        padding: 10px 16px;
+    }
+
+    .chat-btn {
+        padding: 10px 20px;
+    }
+
+    .chat-join-box {
+        width: 90%;
+        padding: 25px;
+        min-width: auto;
+    }
+}

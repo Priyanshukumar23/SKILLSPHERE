@@ -6,6 +6,7 @@ server/.env
 client/node_modules/
 client/dist/
 client/build/
+client/.env
 
 # ===== Logs =====
 *.log

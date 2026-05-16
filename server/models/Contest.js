@@ -1,3 +1,8 @@
+/**
+ * Contest Model
+ * 
+ * Represents a timed event or competition users can register for.
+ */
 const mongoose = require('mongoose');
 
 const ContestSchema = new mongoose.Schema({

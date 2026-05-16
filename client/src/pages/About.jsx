@@ -13,7 +13,7 @@ const About = () => {
                 style={{ textAlign: 'center', marginBottom: '80px' }}
             >
                 <h1 style={{ fontSize: '3.5rem', marginBottom: '20px', background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    About HobbyHub
+                    About SkillSphere
                 </h1>
                 <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)', maxWidth: '700px', margin: '0 auto' }}>
                     Connecting passionate individuals across the globe to share, learn, and grow together in communities they love.
@@ -30,7 +30,7 @@ const About = () => {
                 <FeatureCard
                     icon={<Heart size={32} color="#EC4899" />}
                     title="Passion Driven"
-                    description="Whether it's painting, coding, or hiking, HobbyHub is the home for your hobbies. Share your world with others."
+                    description="Whether it's painting, coding, or hiking, SkillSphere is the home for your hobbies. Share your world with others."
                 />
                 <FeatureCard
                     icon={<Shield size={32} color="#10B981" />}
@@ -48,7 +48,7 @@ const About = () => {
             <div className="glass-panel" style={{ padding: '40px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '20px' }}>
                 <h2 style={{ fontSize: '2rem' }}>Our Story</h2>
                 <p style={{ color: 'var(--text-secondary)', maxWidth: '800px', lineHeight: '1.8' }}>
-                    HobbyHub began with a simple idea: everyone has a passion, but not everyone has a place to share it.
+                    SkillSphere began with a simple idea: everyone has a passion, but not everyone has a place to share it.
                     started as a small project to connect local hobbyists has grown into a global platform where thousands of users
                     come together daily to discuss what they love. We are dedicated to keeping this platform free, fun, and focused on YOU.
                 </p>

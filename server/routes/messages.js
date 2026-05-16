@@ -1,9 +1,16 @@
+/**
+ * Message Routes
+ * 
+ * Retrieves chat history for groups.
+ */
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const Message = require('../models/Message');
 
-// Get messages for a specific group
+// @route   GET api/messages/:groupId
+// @desc    Get chat messages for a specific group
+// @access  Private
 router.get('/:groupId', auth, async (req, res) => {
     try {
         const messages = await Message.find({ group: req.params.groupId })

@@ -1,8 +1,45 @@
+/**
+ * Contest Routes
+ * 
+ * Handles listing, creating, and deleting contests/events.
+ */
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
 const Contest = require('../models/Contest');
 const User = require('../models/User');
+
+// @route   POST api/contests/register/:id
+// @desc    Register for a contest
+// @access  Private
+router.post('/register/:id', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        const contest = await Contest.findById(req.params.id);
+
+        if (!contest) {
+            return res.status(404).json({ msg: 'Contest not found' });
+        }
+
+        // Check if already registered
+        if (user.joinedContests.includes(req.params.id)) {
+            return res.status(400).json({ msg: 'You have already registered for this contest' });
+        }
+
+        // Add to user's joinedContests
+        user.joinedContests.push(req.params.id);
+        await user.save();
+
+        // Increment participants count
+        contest.participants += 1;
+        await contest.save();
+
+        res.json(contest);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 // @route   GET api/contests
 // @desc    Get all contests

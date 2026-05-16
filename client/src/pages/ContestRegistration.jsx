@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Users, User, CheckCircle, Plus, Trash2 } from 'lucide-react';
+import api from '../utils/api';
 
 const ContestRegistration = () => {
     const navigate = useNavigate();
+    const { contestId } = useParams();
     const [registrationType, setRegistrationType] = useState('individual'); // 'individual' or 'group'
     const [members, setMembers] = useState([{ name: '', mobile: '', address: '' }]);
     const [loading, setLoading] = useState(false);
@@ -50,12 +52,19 @@ const ContestRegistration = () => {
 
         setLoading(true);
 
-        // Simulating API call
-        setTimeout(() => {
-            setLoading(false);
+        try {
+            // Pass members and type, though backend currently focuses on linking user to contest
+            await api.post(`/contests/register/${contestId}`, {
+                registrationType,
+                members
+            });
             setSuccess(true);
-            console.log("Registration Data:", { type: registrationType, members });
-        }, 1500);
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.msg || 'Registration failed');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (success) {
@@ -165,7 +174,7 @@ const ContestRegistration = () => {
                                                     onChange={(e) => handleMemberChange(index, 'name', e.target.value)}
                                                     placeholder="John Doe"
                                                     required
-                                                    style={{ width: '100%', padding: '10px', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', borderRadius: '6px', color: 'white', outline: 'none' }}
+                                                    style={{ width: '100%', padding: '10px', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', borderRadius: '6px', color: 'var(--text-primary)', outline: 'none' }}
                                                 />
                                             </div>
                                             <div>
@@ -176,7 +185,7 @@ const ContestRegistration = () => {
                                                     onChange={(e) => handleMemberChange(index, 'mobile', e.target.value)}
                                                     placeholder="+1 234 567 890"
                                                     required
-                                                    style={{ width: '100%', padding: '10px', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', borderRadius: '6px', color: 'white', outline: 'none' }}
+                                                    style={{ width: '100%', padding: '10px', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', borderRadius: '6px', color: 'var(--text-primary)', outline: 'none' }}
                                                 />
                                             </div>
                                             <div style={{ gridColumn: '1 / -1' }}>
@@ -187,7 +196,7 @@ const ContestRegistration = () => {
                                                     onChange={(e) => handleMemberChange(index, 'address', e.target.value)}
                                                     placeholder="123 Main St, City, Country"
                                                     required
-                                                    style={{ width: '100%', padding: '10px', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', borderRadius: '6px', color: 'white', outline: 'none' }}
+                                                    style={{ width: '100%', padding: '10px', background: 'var(--bg-primary)', border: '1px solid var(--glass-border)', borderRadius: '6px', color: 'var(--text-primary)', outline: 'none' }}
                                                 />
                                             </div>
                                         </div>

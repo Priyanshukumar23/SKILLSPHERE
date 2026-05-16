@@ -1,3 +1,9 @@
+/**
+ * Post Model
+ * 
+ * Represents a social feed post created by a user.
+ * Supports images, captions, and interactions (likes/dislikes/comments).
+ */
 const mongoose = require('mongoose');
 
 const PostSchema = new mongoose.Schema({
@@ -47,6 +53,10 @@ const PostSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    isHidden: {
+        type: Boolean,
+        default: false
     }
 });
 

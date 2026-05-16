@@ -28,6 +28,12 @@ const ChatRoom = ({ groupId, user }) => {
             ));
         });
 
+        newSocket.on('message_updated', (updatedMessage) => {
+            setMessages(prev => prev.map(msg =>
+                msg._id === updatedMessage._id ? updatedMessage : msg
+            ));
+        });
+
         const fetchMessages = async () => {
             try {
                 const res = await api.get(`/messages/${groupId}`);
@@ -78,6 +84,18 @@ const ChatRoom = ({ groupId, user }) => {
         socket.emit('vote_poll', { messageId, optionIndex, userId: user._id });
     };
 
+    const handleRestrictMessage = (messageId) => {
+        if (window.confirm('Restrict this message content?')) {
+            socket.emit('restrict_message', { messageId, adminId: user._id });
+        }
+    };
+
+    const handleUnrestrictMessage = (messageId) => {
+        if (window.confirm('Unrestrict this message content?')) {
+            socket.emit('unrestrict_message', { messageId, adminId: user._id });
+        }
+    };
+
     return (
         <div className="glass-panel" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '20px', borderBottom: '1px solid var(--glass-border)' }}>
@@ -115,6 +133,23 @@ const ChatRoom = ({ groupId, user }) => {
                                     </div>
                                     <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                                         {msg.sender?.username || 'User'}
+                                        {user.role === 'admin' && (
+                                            msg.isRestricted ? (
+                                                <span
+                                                    onClick={() => handleUnrestrictMessage(msg._id)}
+                                                    style={{ marginLeft: '8px', color: 'var(--success)', cursor: 'pointer', fontWeight: 'bold' }}
+                                                >
+                                                    Unrestrict
+                                                </span>
+                                            ) : (
+                                                <span
+                                                    onClick={() => handleRestrictMessage(msg._id)}
+                                                    style={{ marginLeft: '8px', color: 'var(--error)', cursor: 'pointer', fontWeight: 'bold' }}
+                                                >
+                                                    Restrict
+                                                </span>
+                                            )
+                                        )}
                                     </div>
                                 </div>
                             )}

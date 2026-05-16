@@ -1,3 +1,9 @@
+/**
+ * Message Model
+ * 
+ * Represents a chat message within a group.
+ * Can be of type text, image, or poll.
+ */
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
@@ -20,6 +26,15 @@ const messageSchema = new mongoose.Schema({
         type: String,  // Used for text message or image URL
         default: ''
     },
+    originalContent: { // Stores original content if restricted
+        type: String,
+        default: ''
+    },
+    isRestricted: {
+        type: Boolean,
+        default: false
+    },
+    // Fields specific to 'poll' type messages
     pollQuestion: {
         type: String
     },

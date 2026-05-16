@@ -1,3 +1,8 @@
+/**
+ * Post Routes
+ * 
+ * Handles feed, creating posts, uploads, likes, and comments.
+ */
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -67,8 +72,51 @@ router.post('/', [auth, upload], async (req, res) => {
 // @access  Private
 router.get('/', auth, async (req, res) => {
     try {
-        const posts = await Post.find().sort({ createdAt: -1 }).populate('user', ['username', 'profilePicture']).populate('comments.user', ['username', 'profilePicture']);
-        res.json(posts);
+        // Fetch posts
+        const posts = await Post.find().sort({ createdAt: -1 })
+            .populate('user', ['username', 'profilePicture'])
+            .populate('comments.user', ['username', 'profilePicture']);
+
+        // Filter out hidden posts unless the requester is an admin
+        // Note: For efficiency, we could filter in DB query, but we need to check admin role first.
+        // Let's assume req.user is populated by middleware but 'role' might need fetch or is in token payload.
+        // If auth middleware decoded token has role, use it. Otherwise, DB check.
+        // Assuming token payload: { user: { id: '...', role: '...' } }
+        // If auth middleware doesn't provide role, we fetch user.
+
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id);
+
+        if (user.role === 'admin') {
+            res.json(posts); // Admin sees all
+        } else {
+            res.json(posts.filter(p => !p.isHidden)); // Users see only visible
+        }
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT api/posts/:id/hide
+// @desc    Toggle hide status of a post (Admin only)
+// @access  Private
+router.put('/:id/hide', auth, async (req, res) => {
+    try {
+        const User = require('../models/User');
+        const user = await User.findById(req.user.id);
+        if (user.role !== 'admin') {
+            return res.status(403).json({ msg: 'Access denied. Admins only.' });
+        }
+
+        const post = await Post.findById(req.params.id);
+        if (!post) {
+            return res.status(404).json({ msg: 'Post not found' });
+        }
+
+        post.isHidden = !post.isHidden;
+        await post.save();
+        res.json(post);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

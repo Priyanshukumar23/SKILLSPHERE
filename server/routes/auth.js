@@ -1,3 +1,8 @@
+/**
+ * Authentication Routes
+ * 
+ * Handles user registration, login, and fetching current user profile.
+ */
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
@@ -48,6 +53,10 @@ router.post('/login', async (req, res) => {
         let user = await User.findOne({ email });
         if (!user) return res.status(400).json({ msg: 'Invalid Credentials' });
 
+        if (user.isBlocked) {
+            return res.status(403).json({ msg: 'Your account has been blocked by administrator.' });
+        }
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ msg: 'Invalid Credentials' });
 
@@ -69,10 +78,15 @@ router.get('/me', auth, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         const Group = require('../models/Group');
+        const Contest = require('../models/Contest');
+
         const joinedGroups = await Group.find({ members: req.user.id });
+        // Since we added joinedContests to User model, we can just populate it
+        await user.populate('joinedContests');
 
         const userObj = user.toObject();
         userObj.joinedGroups = joinedGroups;
+        // joinedContests is already in userObj because we populated it on the user document
 
         res.json(userObj);
     } catch (err) {

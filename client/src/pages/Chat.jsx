@@ -55,6 +55,7 @@ const Chat = () => {
                 }
             }
             appendMessage({
+                id: data.id, // Use ID from server
                 content: data.message,
                 name: data.name,
                 profilePicture: data.profilePicture,
@@ -63,14 +64,35 @@ const Chat = () => {
             });
         });
 
-        socket.on('left', (userName) => {
-            if (userName) appendMessage({ content: `${userName} left the chat`, type: 'system' });
+        socket.on('left', (data) => {
+            const name = typeof data === 'object' ? data.name : data;
+            if (name) appendMessage({ content: `${name} left the chat`, type: 'system' });
+        });
+
+        socket.on('global_message_restricted', ({ messageId }) => {
+            setMessages(prev => prev.map(msg => {
+                if (msg.id === messageId && !msg.isRestricted) {
+                    return { ...msg, originalContent: msg.content, content: '***', isRestricted: true };
+                }
+                return msg;
+            }));
+        });
+
+        socket.on('global_message_unrestricted', ({ messageId }) => {
+            setMessages(prev => prev.map(msg => {
+                if (msg.id === messageId && msg.isRestricted) {
+                    return { ...msg, content: msg.originalContent || msg.content, isRestricted: false };
+                }
+                return msg;
+            }));
         });
 
         return () => {
             socket.off('user-joined');
             socket.off('receive');
             socket.off('left');
+            socket.off('global_message_restricted');
+            socket.off('global_message_unrestricted');
         };
     }, []);
 
@@ -236,20 +258,43 @@ const Chat = () => {
                                         <div className="chat-name" style={{ fontSize: '0.75rem', marginBottom: '2px', opacity: 0.8, display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             {msg.name}
                                             {isAdmin && (
-                                                <button
-                                                    onClick={() => handleBlockUser(msg.name)}
-                                                    style={{
-                                                        background: 'var(--error)',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '4px',
-                                                        padding: '2px 6px',
-                                                        fontSize: '0.6rem',
-                                                        cursor: 'pointer'
-                                                    }}
-                                                >
-                                                    Block
-                                                </button>
+                                                <div style={{ display: 'flex', gap: '5px' }}>
+                                                    <button
+                                                        onClick={() => handleBlockUser(msg.name)}
+                                                        style={{
+                                                            background: 'var(--error)',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            padding: '2px 6px',
+                                                            fontSize: '0.6rem',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        Block
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            const user = JSON.parse(localStorage.getItem('user'));
+                                                            if (msg.isRestricted) {
+                                                                socket.emit('unrestrict_global_message', { messageId: msg.id, adminId: user._id });
+                                                            } else {
+                                                                socket.emit('restrict_global_message', { messageId: msg.id, adminId: user._id });
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            background: msg.isRestricted ? 'var(--accent)' : 'var(--text-secondary)',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            padding: '2px 6px',
+                                                            fontSize: '0.6rem',
+                                                            cursor: 'pointer'
+                                                        }}
+                                                    >
+                                                        {msg.isRestricted ? 'Unrestrict' : 'Restrict'}
+                                                    </button>
+                                                </div>
                                             )}
                                         </div>
                                     )}

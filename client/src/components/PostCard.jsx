@@ -11,6 +11,8 @@ const PostCard = ({ post, user, onDelete }) => {
     const [newComment, setNewComment] = useState('');
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportReason, setReportReason] = useState('');
 
     const audioRef = useRef(null);
 
@@ -86,49 +88,88 @@ const PostCard = ({ post, user, onDelete }) => {
                         )}
                     </div>
                     <div>
-                        <h4 style={{ margin: 0 }}>{post.user ? post.user.username : 'Unknown User'}</h4>
+                        <h4 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {post.user ? post.user.username : 'Unknown User'}
+                            {post.isHidden && <span style={{ fontSize: '0.7rem', background: 'var(--text-secondary)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>Starts Hidden</span>}
+                        </h4>
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                             {new Date(post.createdAt).toLocaleDateString()}
                         </span>
                     </div>
                 </div>
-                {post.user && user && user._id === post.user._id && (
-                    <button onClick={() => onDelete(post._id)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}>
-                        <Trash2 size={20} />
-                    </button>
-                )}
+                <div style={{ display: 'flex', gap: '5px' }}>
+                    {/* Admin Actions */}
+                    {user && user.role === 'admin' && (
+                        <>
+                            <button onClick={async () => {
+                                try {
+                                    await api.put(`/posts/${post._id}/hide`);
+                                    // Ideally notify parent to refresh or just force update UI visually
+                                    window.location.reload(); // Quick refresh to reflect state
+                                } catch (e) {
+                                    alert('Failed to hide post');
+                                }
+                            }} style={{ background: 'var(--text-secondary)', color: 'white', border: 'none', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                {post.isHidden ? 'Unhide' : 'Hide'}
+                            </button>
+                            <button onClick={() => onDelete(post._id)} style={{ background: 'var(--error)', border: 'none', color: 'white', padding: '5px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                Delete
+                            </button>
+                        </>
+                    )}
+
+                    {/* User Actions */}
+                    {post.user && user && user._id === post.user._id ? (
+                        <button onClick={() => onDelete(post._id)} style={{ background: 'none', border: 'none', color: 'var(--error)', cursor: 'pointer' }}>
+                            <Trash2 size={20} />
+                        </button>
+                    ) : (
+                        // Report Button for others
+                        user && (
+                            <button onClick={() => setShowReportModal(true)} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                Report
+                            </button>
+                        )
+                    )}
+                </div>
             </div>
 
             {/* Image */}
             <div style={{ position: 'relative' }}>
-                <img
-                    src={`${import.meta.env.VITE_API_URL}${post.image}`}
-                    alt="Post"
-                    style={{ width: '100%', maxHeight: '500px', objectFit: 'cover' }}
-                />
+                {post.isHidden && user?.role !== 'admin' ? (
+                    <div style={{ height: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000', color: '#fff' }}>Post Hidden</div>
+                ) : (
+                    <>
+                        <img
+                            src={`${import.meta.env.VITE_API_URL}${post.image}`}
+                            alt="Post"
+                            style={{ width: '100%', maxHeight: '500px', objectFit: 'cover', opacity: post.isHidden ? 0.5 : 1 }}
+                        />
 
-                {/* Music Controls Overlay */}
-                {post.music && (
-                    <div style={{
-                        position: 'absolute',
-                        bottom: '15px',
-                        right: '15px',
-                        background: 'rgba(0,0,0,0.6)',
-                        padding: '8px 12px',
-                        borderRadius: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '10px',
-                        backdropFilter: 'blur(5px)'
-                    }}>
-                        <audio ref={audioRef} src={`${import.meta.env.VITE_API_URL}${post.music}`} loop />
-                        <button onClick={togglePlay} style={{ background: 'none', border: 'none', color: 'white', display: 'flex', alignItems: 'center' }}>
-                            <Music size={18} className={isPlaying ? 'spin-animation' : ''} />
-                        </button>
-                        <button onClick={toggleMute} style={{ background: 'none', border: 'none', color: 'white', display: 'flex', alignItems: 'center' }}>
-                            {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                        </button>
-                    </div>
+                        {/* Music Controls Overlay */}
+                        {post.music && (
+                            <div style={{
+                                position: 'absolute',
+                                bottom: '15px',
+                                right: '15px',
+                                background: 'rgba(0,0,0,0.6)',
+                                padding: '8px 12px',
+                                borderRadius: '20px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                backdropFilter: 'blur(5px)'
+                            }}>
+                                <audio ref={audioRef} src={`${import.meta.env.VITE_API_URL}${post.music}`} loop />
+                                <button onClick={togglePlay} style={{ background: 'none', border: 'none', color: 'white', display: 'flex', alignItems: 'center' }}>
+                                    <Music size={18} className={isPlaying ? 'spin-animation' : ''} />
+                                </button>
+                                <button onClick={toggleMute} style={{ background: 'none', border: 'none', color: 'white', display: 'flex', alignItems: 'center' }}>
+                                    {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -194,6 +235,38 @@ const PostCard = ({ post, user, onDelete }) => {
                     )}
                 </AnimatePresence>
             </div>
+
+            {/* Report Modal */}
+            {showReportModal && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div className="glass-panel" style={{ padding: '20px', width: '300px', background: 'var(--bg-primary)' }}>
+                        <h3>Report Post</h3>
+                        <div style={{ margin: '15px 0' }}>
+                            <label style={{ display: 'block', marginBottom: '5px' }}>Reason:</label>
+                            <select
+                                value={reportReason}
+                                onChange={(e) => setReportReason(e.target.value)}
+                                style={{ width: '100%', padding: '8px', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                            >
+                                <option value="">Select a reason...</option>
+                                <option value="sexual content">Sexual Content</option>
+                                <option value="abusive">Abusive / Harassment</option>
+                                <option value="spam">Spam</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+                            <button onClick={() => setShowReportModal(false)} style={{ padding: '5px 10px', cursor: 'pointer' }}>Cancel</button>
+                            <button onClick={() => {
+                                if (!reportReason) return alert('Please select a reason');
+                                api.post('/reports', { reportedPost: post._id, reportedUser: post.user._id, reason: reportReason })
+                                    .then(() => { alert('Report submitted'); setShowReportModal(false); })
+                                    .catch(() => alert('Failed to report'));
+                            }} style={{ padding: '5px 10px', background: 'var(--error)', color: 'white', border: 'none', cursor: 'pointer' }}>Submit</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </motion.div>
     );
 };

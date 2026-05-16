@@ -1,3 +1,8 @@
+/**
+ * User Management Routes
+ * 
+ * Admin routes for managing users (list, block, delete, update profile).
+ */
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
@@ -114,6 +119,29 @@ router.put('/:id/block', auth, async (req, res) => {
         await user.save();
 
         res.json({ msg: `User ${user.isChatBlocked ? 'blocked' : 'unblocked'} from chat`, isChatBlocked: user.isChatBlocked });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT api/users/:id/access-block
+// @desc    Block/Unblock user access (Login block)
+// @access  Private (Admin only)
+router.put('/:id/access-block', auth, async (req, res) => {
+    try {
+        const adminUser = await User.findById(req.user.id);
+        if (adminUser.role !== 'admin') {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+
+        user.isBlocked = !user.isBlocked;
+        await user.save();
+
+        res.json({ msg: `User ${user.isBlocked ? 'blocked' : 'unblocked'} from platform`, isBlocked: user.isBlocked });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

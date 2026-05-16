@@ -1,11 +1,14 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Users, LogOut } from 'lucide-react';
+import { Users, LogOut, Menu, X } from 'lucide-react';
 import api from '../utils/api';
+import './Navbar.css';
 
 const Navbar = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [user, setUser] = useState(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const checkUser = async () => {
         const storedUser = localStorage.getItem('user');
@@ -27,14 +30,14 @@ const Navbar = () => {
 
     useEffect(() => {
         checkUser();
-
-        // Listen for updates from Profile page
         window.addEventListener('userUpdated', checkUser);
-
-        return () => {
-            window.removeEventListener('userUpdated', checkUser);
-        };
+        return () => window.removeEventListener('userUpdated', checkUser);
     }, []);
+
+    // Close menu when route changes
+    useEffect(() => {
+        setIsMenuOpen(false);
+    }, [location]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -44,56 +47,50 @@ const Navbar = () => {
         navigate('/login');
     };
 
+    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
     return (
-        <nav className="glass-panel" style={{
-            position: 'fixed',
-            top: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '90%',
-            maxWidth: '1200px',
-            zIndex: 1000,
-            padding: '1rem 2rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-        }}>
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
-                <Users size={28} color="var(--accent)" />
-                <span>HobbyHub</span>
+        <nav className="navbar glass-panel">
+            <Link to="/" className="nav-brand">
+                <img src="/SkillSphere.png" alt="Logo" className="nav-logo" />
+                <span>SkillSphere</span>
             </Link>
 
-            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                <Link to="/about" style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>About Us</Link>
-                <Link to="/explore" style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Posts</Link>
+            <button className="mobile-menu-btn" onClick={toggleMenu} aria-label="Toggle menu">
+                {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+
+            <div className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
+                <Link to="/about" className="nav-link">About Us</Link>
+                <Link to="/explore" className="nav-link">Posts</Link>
                 {user ? (
                     <>
-                        <Link to="/dashboard" style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Dashboard</Link>
-                        <Link to="/profile" style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Profile</Link>
-                        <Link to="/chat" style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Global Chat</Link>
+                        <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                        <Link to="/profile" className="nav-link">Profile</Link>
+                        <Link to="/chat" className="nav-link">Global Chat</Link>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 14px', background: 'var(--bg-secondary)', borderRadius: '20px', border: '1px solid var(--glass-border)' }}>
+                        <div className="user-pill">
                             {user.profilePicture ? (
                                 <img
                                     src={`${import.meta.env.VITE_API_URL || 'http://localhost:5003'}${user.profilePicture}`}
                                     alt={user.username}
-                                    style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }}
+                                    className="user-avatar"
                                 />
                             ) : (
-                                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                <div className="user-initial-avatar">
                                     {user.username?.charAt(0).toUpperCase()}
                                 </div>
                             )}
-                            <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.9rem' }}>{user.username}</span>
+                            <span className="user-name">{user.username}</span>
                         </div>
 
-                        <button onClick={handleLogout} style={{ background: 'none', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}>
+                        <button onClick={handleLogout} className="logout-btn" title="Logout">
                             <LogOut size={20} />
                         </button>
                     </>
                 ) : (
                     <>
-                        <Link to="/login" style={{ color: 'var(--text-secondary)', fontWeight: '500' }}>Login</Link>
+                        <Link to="/login" className="nav-link">Login</Link>
                         <Link to="/register" className="btn btn-primary" style={{ padding: '8px 16px', fontSize: '0.9rem' }}>Get Started</Link>
                     </>
                 )}
