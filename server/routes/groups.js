@@ -1,9 +1,49 @@
+/**
+ * Group Routes
+ * 
+ * Manages group CRUD operations, membership (join/leave), and admin actions.
+ */
 const express = require('express');
 const router = express.Router();
 const Group = require('../models/Group');
 const auth = require('../middleware/auth');
 
-// Get all groups
+const multer = require('multer');
+const path = require('path');
+
+// Set up storage engine
+const storage = multer.diskStorage({
+    destination: './uploads/',
+    filename: function (req, file, cb) {
+        cb(null, 'group-' + Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Init upload
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 50000000 }, // 50MB limit
+    fileFilter: function (req, file, cb) {
+        checkFileType(file, cb);
+    }
+}).single('image');
+
+// Check File Type
+function checkFileType(file, cb) {
+    const filetypes = /jpeg|jpg|png|gif/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+
+    if (mimetype && extname) {
+        return cb(null, true);
+    } else {
+        cb('Error: Images Only!');
+    }
+}
+
+// @route   GET api/groups
+// @desc    Get all groups
+// @access  Public
 router.get('/', async (req, res) => {
     try {
         const groups = await Group.find().populate('createdBy', 'username');
@@ -14,7 +54,9 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Get single group
+// @route   GET api/groups/:id
+// @desc    Get single group by ID
+// @access  Public
 router.get('/:id', async (req, res) => {
     try {
         const group = await Group.findById(req.params.id).populate('createdBy', 'username').populate('members', ['username', 'profilePicture']);
@@ -27,33 +69,49 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Create a group
+// @route   POST api/groups
+// @desc    Create a new group
+// @access  Private
 router.post('/', auth, async (req, res) => {
-    try {
-        const { name, description, category, image } = req.body;
-        const newGroup = new Group({
-            name,
-            description,
-            category,
-            image,
-            createdBy: req.user.id,
-            members: [req.user.id]
-        });
+    upload(req, res, async (err) => {
+        if (err) {
+            return res.status(400).json({ msg: err });
+        }
 
-        const group = await newGroup.save();
+        try {
+            const { name, description, category } = req.body;
+            let image = req.body.image; // Fallback to URL if provided
 
-        // Add to user's joinedGroups
-        const User = require('../models/User');
-        await User.findByIdAndUpdate(req.user.id, { $addToSet: { joinedGroups: group._id } });
+            if (req.file) {
+                image = `/uploads/${req.file.filename}`;
+            }
 
-        res.json(group);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
+            const newGroup = new Group({
+                name,
+                description,
+                category,
+                image,
+                createdBy: req.user.id,
+                members: [req.user.id]
+            });
+
+            const group = await newGroup.save();
+
+            // Add to user's joinedGroups
+            const User = require('../models/User');
+            await User.findByIdAndUpdate(req.user.id, { $addToSet: { joinedGroups: group._id } });
+
+            res.json(group);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+    });
 });
 
-// Join a group
+// @route   POST api/groups/:id/join
+// @desc    Join a group
+// @access  Private
 router.post('/:id/join', auth, async (req, res) => {
     try {
         const group = await Group.findById(req.params.id);
@@ -62,6 +120,11 @@ router.post('/:id/join', auth, async (req, res) => {
         // Check if already member
         if (group.members.some(member => member.toString() === req.user.id)) {
             return res.status(400).json({ msg: 'Already a member' });
+        }
+
+        // Check if group is restricted
+        if (group.isRestricted) {
+            return res.status(403).json({ msg: 'Group is restricted by admin. Cannot join.' });
         }
 
         group.members.push(req.user.id);
@@ -78,7 +141,9 @@ router.post('/:id/join', auth, async (req, res) => {
     }
 });
 
-// Leave a group
+// @route   POST api/groups/:id/leave
+// @desc    Leave a group
+// @access  Private
 router.post('/:id/leave', auth, async (req, res) => {
     try {
         const group = await Group.findById(req.params.id);
