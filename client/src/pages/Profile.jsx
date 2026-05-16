@@ -66,7 +66,7 @@ const Profile = () => {
     if (loading) return <div style={{ paddingTop: '100px', textAlign: 'center' }}>Loading...</div>;
     if (error) return <div style={{ paddingTop: '100px', textAlign: 'center', color: 'var(--error)' }}>{error}</div>;
 
-    const profilePicUrl = previewUrl || (profile.profilePicture ? `http://localhost:5003${profile.profilePicture}` : null);
+    const profilePicUrl = previewUrl || (profile.profilePicture ? `${import.meta.env.VITE_API_URL || 'http://localhost:5003'}${profile.profilePicture}` : null);
 
     return (
         <div className="container" style={{ paddingTop: '120px', paddingBottom: '50px' }}>
@@ -200,6 +200,30 @@ const Profile = () => {
                                 </div>
                             ) : (
                                 <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No groups joined yet.</p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'start', gap: '15px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+                        <div style={{ marginTop: '5px' }}>🏆</div>
+                        <div>
+                            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '5px' }}>Joined Events</p>
+                            {profile.joinedContests && profile.joinedContests.length > 0 ? (
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                                    {profile.joinedContests.map(contest => (
+                                        <span key={contest._id} style={{
+                                            padding: '5px 12px',
+                                            background: 'var(--success)',
+                                            borderRadius: '20px',
+                                            fontSize: '0.9rem',
+                                            color: 'white'
+                                        }}>
+                                            {contest.title}
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>No events joined yet.</p>
                             )}
                         </div>
                     </div>
