@@ -5,7 +5,7 @@ import { X, ArrowRight, MessageCircle, Users, Image, Sparkles, Heart } from 'luc
 const tutorials = [
     {
         id: 0,
-        title: "Welcome to HobbyHub!",
+        title: "Welcome to SkillSphere!",
         description: "Your ultimate platform to connect, share, and grow.",
         icon: <Sparkles size={48} />,
         color: "#F59E0B" // Amber
@@ -140,7 +140,7 @@ const OnboardingTutorial = ({ onComplete }) => {
                             fontWeight: '700',
                             letterSpacing: '-1px'
                         }}>
-                            HobbyHub
+                            SkillSphere
                         </h1>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem' }}>
                             Discover. Connect. Belong.
