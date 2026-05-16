@@ -66,7 +66,13 @@ const GroupDetails = () => {
     return (
         <div style={{ paddingTop: '100px', minHeight: '100vh', paddingBottom: '50px' }}>
             <div className="container">
-                <div className="glass-panel" style={{ padding: '40px', marginBottom: '40px' }}>
+                <div className="glass-panel" style={{
+                    padding: '40px',
+                    marginBottom: '40px',
+                    backgroundImage: group.image ? `linear-gradient(var(--glass), var(--glass)), url(${group.image.startsWith('http') ? group.image : api.defaults.baseURL.replace('/api', '') + group.image})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
                             <h1 style={{ fontSize: '3rem', marginBottom: '10px' }}>{group.name}</h1>
@@ -85,7 +91,7 @@ const GroupDetails = () => {
                                     </button>
                                 </>
                             )}
-                            {!isMember && (
+                            {!isMember && user?.role !== 'admin' && (
                                 <button onClick={handleJoin} className="btn btn-primary">Join Group</button>
                             )}
                         </div>
@@ -114,7 +120,7 @@ const GroupDetails = () => {
                 </div>
 
                 {/* Chat Section */}
-                {isMember && user && (
+                {(isMember || user?.role === 'admin') && user && (
                     <div style={{ marginBottom: '40px' }}>
                         <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>Community Chat</h2>
                         <ChatRoom groupId={id} user={user} />
