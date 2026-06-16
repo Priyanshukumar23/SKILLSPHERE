@@ -149,3 +149,18 @@
         justify-content: center;
     }
 }
+
+.theme-toggle-btn {
+    background: none;
+    color: var(--text-primary);
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    transition: color 0.2s;
+}
+
+.theme-toggle-btn:hover {
+    color: var(--accent);
+}

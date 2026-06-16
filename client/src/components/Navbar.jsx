@@ -1,6 +1,6 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Users, LogOut, Menu, X } from 'lucide-react';
+import { Users, LogOut, Menu, X, Sun, Moon } from 'lucide-react';
 import api from '../utils/api';
 import './Navbar.css';
 
@@ -9,6 +9,26 @@ const Navbar = () => {
     const location = useLocation();
     const [user, setUser] = useState(null);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDarkMode, setIsDarkMode] = useState(false);
+
+    useEffect(() => {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            setIsDarkMode(true);
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        if (isDarkMode) {
+            document.body.classList.remove('dark-theme');
+            localStorage.setItem('theme', 'light');
+            setIsDarkMode(false);
+        } else {
+            document.body.classList.add('dark-theme');
+            localStorage.setItem('theme', 'dark');
+            setIsDarkMode(true);
+        }
+    };
 
     const checkUser = async () => {
         const storedUser = localStorage.getItem('user');
@@ -61,6 +81,9 @@ const Navbar = () => {
             </button>
 
             <div className={`nav-links ${isMenuOpen ? 'open' : ''}`}>
+                <button onClick={toggleTheme} className="theme-toggle-btn" title="Toggle Theme">
+                    {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+                </button>
                 <Link to="/about" className="nav-link">About Us</Link>
                 <Link to="/explore" className="nav-link">Posts</Link>
                 {user ? (
